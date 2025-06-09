@@ -3,3 +3,5 @@
 *.log
 *.dat
 .DS_Store
+*.ipynb_checkpoints
+archive
