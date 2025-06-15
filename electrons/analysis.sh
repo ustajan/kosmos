@@ -14,4 +14,4 @@ fi
 THRESHOLD="$1"
 INPUT_FILE="$2"
 
-awk -v threshold="$THRESHOLD" 'BEGIN{e=0;n=0;}{if($2>threshold) {e+=$2;n++;}}END{print "counts=" n " period=" 1e+9/(54897000*n/NR)"ns" " Average E=" e/n "MeV";}' $INPUT_FILE
+awk -v threshold="$THRESHOLD" 'BEGIN{e=0;n=0;}{if($2>threshold) {e+=$2;n++;}}END{print "counts=" n " period=" 1e+9/(31591000*n/NR)"ns" " Average E=" e/n "MeV";}' $INPUT_FILE
