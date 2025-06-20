@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<!-- Areg Danagoulian -->
+
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="~/git/grasshopper/schema/gdml.xsd">
+
+
+
+   <materials>
+
+    <element Z="26" name="Iron_elemental">
+      <atom unit="g/mole" value="55.85"/>
+    </element>
+
+    <element Z="7" name="Nitrogen0xfa1d40">
+      <atom unit="g/mole" value="14.01"/>
+    </element>
+
+    <element Z="8" name="Oxygen0xfa1f00">
+      <atom unit="g/mole" value="16"/>
+    </element>
+    <element Z="1" name="H">
+      <atom unit="g/mole" value="1.00784"/>
+    </element>
+    <element Z="5" name="B">
+      <atom unit="g/mole" value="10.81"/>
+    </element>
+    <element Z="6" name="C">
+      <atom unit="g/mole" value="12.01"/>
+    </element>
+
+    <!-- diamond -->
+    <material name="diamond" state="solid">
+      <D unit="g/cm3" value="3.2"/>
+      <fraction n="1" ref="C"/>
+    </material>
+
+    <!-- NH₃BH₃ -->
+    <material name="NH3BH3" state="solid">
+      <D unit="g/cm3" value="0.78"/>
+      <fraction n="0.125" ref="Nitrogen0xfa1d40"/>
+      <fraction n="0.125" ref="B"/>
+      <fraction n="0.75" ref="H"/>
+    </material>
+
+
+    <material name="Air" state="gas">
+      <D unit="g/cm3" value="0.00129"/>
+      <fraction n="0.7" ref="Nitrogen0xfa1d40"/>
+      <fraction n="0.3" ref="Oxygen0xfa1f00"/>
+    </material>
+    <material name="Vacuum" state="gas">
+      <D unit="g/cm3" value="0.000000000000001"/>
+      <fraction n="0.7" ref="Nitrogen0xfa1d40"/>
+      <fraction n="0.3" ref="Oxygen0xfa1f00"/>
+    </material>
+    <material name="Iron" state="solid">
+      <D unit="g/cm3" value="7.6"/>
+      <fraction n="1" ref="Iron_elemental"/>
+    </material>
+
+    <material name="NaI" state="solid">
+      <D unit="g/cm3" value="3.7" />
+      <fraction n="1" ref="G4_Na"/>
+      <fraction n="1" ref="G4_I"/>
+    </material>
+
+    <isotope name="D2" Z="1" N="2">
+      <atom unit="g/mol" value="2.014"/>
+    </isotope>
+    <element name="Deuterium">
+      <fraction n = "1.00" ref="D2"/>
+    </element>
+    <material name="D2O" state="liquid">
+      <D unit="g/cm3" value="1.11"/>
+      <composite n="2" ref="Deuterium"/>
+      <composite n="1" ref="Oxygen0xfa1d40"/>
+    </material>
+
+
+    <isotope name="Tc99" Z="43" N="99">
+      <atom unit="g/mol" value="98.906254"/>
+    </isotope>
+    <element name="Tec99">
+      <fraction n="1.00" ref="Tc99"/>
+    </element>
+    <material name="technecium99" state="solid">
+      <D unit="g/cm3" value="11.5"/>
+      <composite n="1" ref="Tec99"/>
+    </material>
+
+  </materials>
+
+    
+  <!-- THE OUTPUT -->
+  <define>
+  	<constant name="TextOutputOn" value="1"/> <!-- the value should be either 1 (true) or 0 -->
+  	<constant name="BriefOutputOn" value="1"/> <!-- enable this if you want the shorter version of the text output -->
+  	<constant name="VRMLvisualizationOn" value="1"/> <!-- 1 means that you want a VRML file -->
+  	<constant name="EventsToAccumulate" value="250"/> <!-- number of tracks to accumulate in the visualization -->
+  </define>
+  
+  <!-- CUTS...apply various cuts to make the computation more efficient -->
+  <define>
+    <constant name="LightProducingParticle" value="2212"/> <!-- the particle which is actually producing light in the detector.  0 means ALL.  It will also kill all particles other than LightProducingParticle in the detector.  If in doubt set to 0. -->
+    <constant name="LowEnergyCutoff" value="0"/><!-- The low energy cuttoff, MeV, for the main track. If in doubt set it to 0 -->
+    <constant name="KeepOnlyMainParticle" value="0"/> <!-- if 1, the simulation will track only the main particle, as defined by ParticleNumber in the beam definition, OUTSIDE the detector volume.  For example, you'll need to set this to 0 to simulate bremmstrahlung, but to 1 for any transmission simulation. If in doubt, set to 0.-->
+    <quantity name="ProductionLowLimit" type="threshold" value="1000" unit="keV" /> <!-- for neutron processes anything >1keV causes things to hang...set this to a high value for any other process to optimize computational time.  There are still some intricacies with this.  With high enough energy, rather than generating secondaries, all the energy loss will get tagged to the EnergyDeposited for the main particle.  So, the energy scoring (as determined by LighProducingParticle above) needs to be adjusted accordingly. -->
+  </define>
+
+<!-- OUTPUT FILTERS.  What data/entries do you want to keep? -->
+  <define>
+    <constant name="SaveSurfaceHitTrack" value="0"/> <!-- save entries which contain hit information, e.g. if you want to simulate the flux of particles -->
+    <constant name="SaveTrackInfo" value="1"/> <!-- save individual track info (within an event).  This is useful for studying the physics of the various interactions -->
+    <constant name="SaveEdepositedTotalEntry" value="0"/> <!--save entries which summarize the total deposited energy, e.g. in detector response simulations -->
+  </define>
+
+  <!-- THE BEAM -->
+  <define>
+    <constant name="RandomGenSeed" value="0"/>
+    <quantity name="BeamOffsetX"  type="coordinate" value="0" unit="mm"/>
+    <quantity name="BeamOffsetY"  type="coordinate" value="0" unit="mm"/>    
+    <quantity name="BeamOffsetZ"  type="coordinate" value="-20" unit="mm"/> <!-- all in mm -->    
+    <quantity name="BeamSize" type="coordinate" value="10" unit="mm"/> <!-- -1 means a fan beam, -2 means an isotropic emission.  All zero or positive values determine the beam radius. -->
+    <quantity name="WorldRadius" type="coordinate" value="40" unit="mm"/>
+
+    <quantity name="BeamEnergy" type="energy" value="-1" unit="MeV"/> <!-- this is in MeV --> <!-- a negative number prompts reading input_spectrum.txt -->
+    <constant name="EventsToRun" value="100000"/> <!-- corresponds to 3,846,153 seconds -->
+    <constant name="ParticleNumber" value="2112"/> 
+    <!-- e- is 11, gamma is 22, neutron is 2112, proton is 2212, alpha is 1000020040 -->
+ 
+  </define>
+
+  <!-- definition of solids -->
+  <solids>
+    <!-- world volume -->
+<!--    <box lunit="mm" name="world_solid" x="1000" y="1000" z="1000"/>   -->
+    <sphere name = "world_solid" rmin="0" rmax="52" deltaphi="360" deltatheta="180" aunit="deg" lunit= "cm"/>  <!-- this is a little risky -->
+
+    <box lunit="mm" name="veto_outer" x="12" y="12" z="12"/>  
+    <box lunit="mm" name="veto_inner" x="10" y="10" z="10"/>    
+    <subtraction name="veto_solid">
+      <first ref="veto_outer"/>
+      <second ref="veto_inner"/>
+      <position name="veto_inner_pos" unit="mm" x="0" y="0" z="0"/>
+    </subtraction>
+
+    <box lunit="mm" name="deadlayer_outer" x="12.00012" y="12.00012" z="12.00012"/> <!-- Based on 60nm dead layer from https://doi.org/10.1016/j.nima.2009.04.044 -->  
+    <box lunit="mm" name="deadlayer_inner" x="12" y="12" z="12"/>    
+    <subtraction name="deadlayer_solid">
+      <first ref="deadlayer_outer"/>
+      <second ref="deadlayer_inner"/>
+      <position name="veto_inner_pos" unit="mm" x="0" y="0" z="0"/>
+    </subtraction>
+
+    <box lunit="mm" name="kapton_outer" x="1" y="12.12012" z="12.12012"/> <!-- kapton insulating film -->  
+    <box lunit="mm" name="kapton_inner" x="1" y="12.00012" z="12.00012"/>    
+    <subtraction name="kapton_solid">
+      <first ref="kapton_outer"/>
+      <second ref="kapton_inner"/>
+      <position name="veto_inner_pos" unit="mm" x="0" y="0" z="0"/>
+    </subtraction>
+
+
+    <box lunit="cm" name="det_solid" x="0.9" y="0.9" z="0.9"/>    
+
+
+  </solids>
+
+
+  <!-- PUTTING IT ALL TOGETHER -->
+  <structure>
+
+    <volume name="kapton_log">
+      <materialref ref="G4_KAPTON"/> <!-- G4_PLASTIC_SC_VINYLTOLUENE -->
+      <solidref ref="kapton_solid"/>
+    </volume>
+
+    <volume name="deadlayer_log">
+      <materialref ref="diamond"/> <!-- G4_PLASTIC_SC_VINYLTOLUENE -->
+      <solidref ref="deadlayer_solid"/>
+    </volume>
+
+    <volume name="veto_log">
+      <materialref ref="diamond"/> <!-- G4_PLASTIC_SC_VINYLTOLUENE -->
+      <solidref ref="veto_solid"/>
+    </volume>
+    <volume name="det_log">
+      <materialref ref="G4_PLASTIC_SC_VINYLTOLUENE"/> <!-- G4_PLASTIC_SC_VINYLTOLUENE -->
+      <solidref ref="det_solid"/>
+    </volume>
+
+    <!-- top level world volume with all geometry elements -->
+    <volume name="world_log">
+      <materialref ref="Vacuum"/>
+      <solidref ref="world_solid"/>  <!-- This should NEVER be changed -->
+
+      <physvol name="kapton_phys"> 
+        <volumeref ref="kapton_log"/>
+        <position name="kapton_phys_pos" unit="mm" x="5.50006" y="0" z="0"/>
+      </physvol>
+
+      <physvol name="deadlayer_phys"> 
+        <volumeref ref="deadlayer_log"/>
+        <position name="deadlayer_phys_pos" unit="cm" x="0" y="0" z="0"/>
+      </physvol>
+
+      <physvol name="det_phys1"> 
+        <volumeref ref="veto_log"/>
+        <position name="veto_phys_pos" unit="cm" x="0" y="0" z="0"/>
+      </physvol>
+
+      <physvol name="det_phys0"> 
+        <volumeref ref="det_log"/>
+        <position name="det_phys_pos" unit="cm" x="0" y="0" z="0"/>
+      </physvol>
+    </volume>
+
+  </structure>
+
+  <setup name="Default" version="1.0">
+    <world ref="world_log"/>
+  </setup>
+</gdml>
