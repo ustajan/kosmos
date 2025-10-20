@@ -112,7 +112,7 @@
 
     <!-- the  detection plane -->
     <box lunit="cm" name="veto_solid" unit="cm" x="30" y="30" z="0.1"/>    
-    <box lunit="cm" name="detector_solid" unit="cm" x="30" y="30" z="1"/>    
+    <box lunit="cm" name="detector_solid" unit="cm" x="30" y="30" z="1"/>    <!-- 9U, plus 1mm diamond -->
 
   </solids>
 

@@ -67,8 +67,8 @@
   <define>
   	<constant name="TextOutputOn" value="1"/> <!-- the value should be either 1 (true) or 0 -->
 	<constant name="BriefOutputOn" value="0"/> <!-- enable this if you want the shorter version of the text output -->
-  	<constant name="VRMLvisualizationOn" value="0"/> <!-- 1 means that you want a VRML file -->
-  	<constant name="EventsToAccumulate" value="0"/> <!-- number of tracks to accumulate in the visualization -->
+  	<constant name="VRMLvisualizationOn" value="1"/> <!-- 1 means that you want a VRML file -->
+  	<constant name="EventsToAccumulate" value="50"/> <!-- number of tracks to accumulate in the visualization -->
   </define>
   
   <!-- CUTS...apply various cuts to make the computation more efficient -->
@@ -92,7 +92,7 @@
     <quantity name="BeamOffsetX"  type="coordinate" value="0" unit="mm"/>
     <quantity name="BeamOffsetY"  type="coordinate" value="0" unit="mm"/>    
     <quantity name="BeamOffsetZ"  type="coordinate" value="-30" unit="cm"/> <!-- all in mm -->    
-    <quantity name="BeamSize" type="coordinate" value="50" unit="mm"/>
+    <quantity name="BeamSize" type="coordinate" value="150" unit="mm"/>
 
     <quantity name="BeamEnergy" type="energy" value="-1" unit="MeV"/> <!-- this is in MeV --> <!-- a negative number prompts reading input_spectrum.txt -->
     <constant name="EventsToRun" value="100000"/>
@@ -111,7 +111,7 @@
 
 
     <!-- the  detection plane -->
-    <box lunit="cm" name="detector_solid" unit="cm" x="10" y="10" z="1"/>    
+    <box lunit="cm" name="detector_solid" unit="cm" x="30" y="30" z="1"/>    <!-- 9U -->
 
   </solids>
 

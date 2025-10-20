@@ -111,7 +111,7 @@
 
 
     <!-- the  detection plane -->
-    <box lunit="cm" name="detector_solid" unit="cm" x="10" y="10" z="1"/>    
+    <box lunit="cm" name="detector_solid" unit="cm" x="30" y="30" z="1"/>    <!-- 9U -->
 
   </solids>
 
