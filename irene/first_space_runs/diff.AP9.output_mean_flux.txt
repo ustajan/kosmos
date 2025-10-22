@@ -1,4 +1,4 @@
-# Irene Model output file: space_first/diff.AP9.output_mean_flux.txt
+# Irene Model output file: space_first/run/diff.AP9.output_mean_flux.txt
 # Irene Software Version:  1.58.001
 #
 # Model type:               AP9
