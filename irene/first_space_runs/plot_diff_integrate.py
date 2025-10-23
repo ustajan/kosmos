@@ -88,7 +88,6 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
             break
         y = flux[i, :n_flux_cols]
         elapsed_minutes = i 
-
         spallation_neutron_count = integrate_spectrum_byEq1(
             energy_bins, y, threshold=200
         )
@@ -98,14 +97,12 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
             for idx, (e_val, f_val) in enumerate(zip(energy_bins, y)):
                 print(f"  Bin {idx:2d}: E = {e_val:.4f} MeV, Flux = {f_val:.6e} cm^-2 s^-1 MeV^-1")
 
-
         plt.plot(
             energy_bins,
             y,
             color=c,
             label=f'{elapsed_minutes:.0f} min, neutrons = {spallation_neutron_count:.1e} s$^{{-1}}$'
         )
-
 
     if model == 'AE9':
         ylabel = 'electron flux [cm$^{-2}$ s$^{-1}$ MeV$^{-1}$]'
@@ -131,6 +128,29 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
     print(f'Average spallation neutron rate over plotted steps: {avg_neutron_rate:.3e} s^-1')
 
 
+def integrate_above_cut(bins, flux_2d, cut):
+    # bins: (n_bins,) centers in MeV
+    # flux_2d: (n_times, n_bins) differential flux in cm^-2 s^-1 MeV^-1
+    b = np.asarray(bins)
+    y = np.asarray(flux_2d)
+
+    # construct bin edges from centers
+    edges = np.empty(b.size + 1, dtype=float)
+    edges[1:-1] = 0.5 * (b[1:] + b[:-1])
+    edges[0] = b[0] - 0.5 * (b[1] - b[0])
+    edges[-1] = b[-1] + 0.5 * (b[-1] - b[-2])
+
+    # widths if no threshold
+    widths = edges[1:] - edges[:-1]
+
+    # apply threshold: effective width of each bin above 'cut'
+    # For each bin i, width' = max(0, edge[i+1] - max(edge[i], cut))
+    left = np.maximum(edges[:-1], cut)
+    right = edges[1:]
+    eff_widths = np.clip(right - left, a_min=0.0, a_max=None)
+
+    # integrate: sum_j y[:, j] * eff_widths[j]
+    return (y * eff_widths).sum(axis=1)
 
 def plot_time_resolved_neutron_yield_from_diff(ae9_file, ap9_file, threshold=200, lower_energy_cut=1.0):
 
@@ -138,36 +158,32 @@ def plot_time_resolved_neutron_yield_from_diff(ae9_file, ap9_file, threshold=200
     model_e, time_e, bins_e, flux_e = load_diff_flux(ae9_file)
     model_p, time_p, bins_p, flux_p = load_diff_flux(ap9_file)
 
+    #mask_e = bins_e >= lower_energy_cut
+    mask_p = bins_p >= lower_energy_cut
+
     neutron_yields = []
     for i in range(flux_p.shape[0]):
-        mask = bins_p >= lower_energy_cut
         neutron_count = integrate_spectrum_byEq1(
-            bins_p[mask],
-            flux_p[i, mask],
+            bins_p[mask_p],
+            flux_p[i, mask_p],
             threshold=threshold
         )
         neutron_yields.append(neutron_count)
     neutron_yields = np.array(neutron_yields)
 
-    idx_e = np.argmin(np.abs(bins_e - lower_energy_cut))
-    flux_e_plot = flux_e[:, idx_e]
-    chosen_energy_e = bins_e[idx_e]
+    # Integrate electron and proton flux over energy bins above lower_energy_cut
 
-    idx_p = np.argmin(np.abs(bins_p - lower_energy_cut))
-    chosen_energy_p = bins_p[idx_p]
-    flux_p_plot = flux_p[:, idx_p]
+    flux_e_plot = integrate_above_cut(bins_e, flux_e, lower_energy_cut)  # cm^-2 s^-1
+    flux_p_plot = integrate_above_cut(bins_p, flux_p, lower_energy_cut)  # cm^-2 s^-1
 
-    print(f"Electron flux plotted at {chosen_energy_e:.2f} MeV")
-    print(f"Proton flux plotted at {chosen_energy_p:.2f} MeV")
 
     fig, ax1 = plt.subplots(figsize=(10, 5))
 
     # Electron and proton flux time series
     ax1.plot(time_e, flux_e_plot, 'r-', 
-         label=f'{model_e} flux≥ {chosen_energy_e:.2f} MeV')
-    print(flux_e_plot[125], time_e[125])
+         label=f'{model_e} flux≥ {lower_energy_cut:.2f} MeV')
     ax1.plot(time_p, flux_p_plot, 'b-', 
-         label=f'{model_p} flux ≥ {chosen_energy_p:.2f} MeV')
+         label=f'{model_p} flux ≥ {lower_energy_cut:.2f} MeV')
     ax1.set_yscale('log')
     ax1.set_xlabel('Time [min]')
     ax1.set_ylabel('Charged particle flux [cm$^{-2}$ s$^{-1}$]')
