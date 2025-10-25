@@ -1,3 +1,11 @@
+'''
+
+Plot differential flux from IRENE AE9/AP9 output files and integrate spallation neutron yield
+using Carpenter et al. (2012) Eq. 1 scaling.
+
+Date:    October 2025
+'''
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -73,6 +81,7 @@ def load_diff_flux(filename):
 def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step_size=1):
     model, time, energy_bins, flux = load_diff_flux(filename)
 
+    verbose = False
     # If user supplied model_type, override auto-detection
     if model_type is not None:
         model = model_type.upper()
@@ -92,7 +101,7 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
             energy_bins, y, threshold=200
         )
         total_neutron_count += spallation_neutron_count
-        if i == start_step:
+        if i == start_step and verbose:
             print("Energy bins and flux contents at this step:")
             for idx, (e_val, f_val) in enumerate(zip(energy_bins, y)):
                 print(f"  Bin {idx:2d}: E = {e_val:.4f} MeV, Flux = {f_val:.6e} cm^-2 s^-1 MeV^-1")
@@ -176,15 +185,18 @@ def plot_time_resolved_neutron_yield_from_diff(ae9_file, ap9_file, threshold=200
     flux_e_plot = integrate_above_cut(bins_e, flux_e, lower_energy_cut)  # cm^-2 s^-1
     flux_p_plot = integrate_above_cut(bins_p, flux_p, lower_energy_cut)  # cm^-2 s^-1
 
+#   # Alternative method using searchsorted
+#    start_idx = np.searchsorted(bins_e, lower_energy_cut)
+#    flux_e_plot = (np.diff(bins_e)[start_idx-1:]*flux_e[:,start_idx:]).sum(axis=1)
 
     fig, ax1 = plt.subplots(figsize=(10, 5))
 
     # Electron and proton flux time series
     ax1.plot(time_e, flux_e_plot, 'r-', 
-         label=f'{model_e} flux≥ {lower_energy_cut:.2f} MeV')
+         label=f'{model_e} e$^-$ flux≥ {lower_energy_cut:.2f} MeV')
     ax1.plot(time_p, flux_p_plot, 'b-', 
-         label=f'{model_p} flux ≥ {lower_energy_cut:.2f} MeV')
-    ax1.set_yscale('log')
+         label=f'{model_p} p$^+$ flux ≥ {lower_energy_cut:.2f} MeV')
+#    ax1.set_yscale('log')
     ax1.set_xlabel('Time [min]')
     ax1.set_ylabel('Charged particle flux [cm$^{-2}$ s$^{-1}$]')
     ax1.grid(True, which='both', linestyle='--', alpha=0.6)
@@ -192,27 +204,27 @@ def plot_time_resolved_neutron_yield_from_diff(ae9_file, ap9_file, threshold=200
     # Neutron yield on secondary axis
     ax2 = ax1.twinx()
     ax2.plot(time_p, neutron_yields, 'g-', label='Spallation Neutron Yield')
-    ax2.set_yscale('log')
+ #   ax2.set_yscale('log')
     ax2.set_ylabel('Neutron yield [s$^{-1}$]')
 
     # Combine legends
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
 
     plt.tight_layout()
     out_file = Path(ae9_file).with_suffix(f'.time_resolved_neutron_cut{lower_energy_cut:.1f}MeV.png')
     plt.savefig(out_file, dpi=300)
     plt.show()
 
-    total_neutron_count = np.trapz(neutron_yields, x=time_p * 60)
+    total_neutron_count = np.trapezoid(neutron_yields, x=time_p * 60)
     print(f"Time-resolved neutron yield plot saved to {out_file}")
     print(f"Total neutron count over mission (bins ≥ {lower_energy_cut} MeV): {total_neutron_count:.3e} counts")
 
 
 if __name__ == "__main__":
-    plot_irene_flux('diff.AE9.output_mean_flux.txt', n_curves=11, start_step=0, step_size=36)
-    plot_irene_flux('diff.AP9.output_mean_flux.txt', n_curves=11, start_step=0, step_size=36)
+    plot_irene_flux('diff.AE9.output_mean_flux.txt', n_curves=15, start_step=308, step_size=1) #11,0,36
+    plot_irene_flux('diff.AP9.output_mean_flux.txt', n_curves=15, start_step=308, step_size=1)
 
     plot_time_resolved_neutron_yield_from_diff(
     'diff.AE9.output_mean_flux.txt',
