@@ -87,6 +87,18 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
         model = model_type.upper()
 
     n_flux_cols = flux.shape[1]
+    # --- SAVE AE9 slice i=316 ---
+    save_i = 316
+    if 0 <= save_i < flux.shape[0]:
+        out_path = Path(filename).with_name(f"{Path(filename).stem}.{model}_i{save_i}.tsv")
+        arr = np.vstack((energy_bins[:n_flux_cols], flux[save_i, :n_flux_cols])).T
+#        np.savetxt(out_path, arr, delimiter="\t", header="E_MeV\tflux", comments="", fmt="%.6e")
+        np.savetxt(out_path, arr, delimiter="\t", comments="", fmt="%.6e")
+        print(f"Saved {model} energy/flux slice i={save_i} -> {out_path}")
+    else:
+        print(f"Save index {save_i} out of range (0..{flux.shape[0]-1})")
+
+
 
     plt.figure(figsize=(12, 4))
     colors = plt.cm.jet(np.linspace(0, 1, n_curves))
@@ -106,24 +118,32 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
             for idx, (e_val, f_val) in enumerate(zip(energy_bins, y)):
                 print(f"  Bin {idx:2d}: E = {e_val:.4f} MeV, Flux = {f_val:.6e} cm^-2 s^-1 MeV^-1")
 
+        if model == 'AP9':
+            plot_label = f'{elapsed_minutes:.0f} min, neutrons = {spallation_neutron_count:.1e} s$^{{-1}}$'
+        else:
+            plot_label = f'{elapsed_minutes:.0f} min'
         plt.plot(
             energy_bins,
             y,
             color=c,
-            label=f'{elapsed_minutes:.0f} min, neutrons = {spallation_neutron_count:.1e} s$^{{-1}}$'
+            label=plot_label
         )
 
     if model == 'AE9':
         ylabel = 'electron flux [cm$^{-2}$ s$^{-1}$ MeV$^{-1}$]'
+        desired_xmax = 5.0
     else:
         ylabel = 'proton flux [cm$^{-2}$ s$^{-1}$ MeV$^{-1}$]'
+        desired_xmax = 1250.0
 
     plt.xscale('linear')
     plt.yscale('log')
-    plt.xlabel('E [MeV]')
-    plt.ylabel(ylabel)
-    plt.title(f'IRENE {model} model – Differential flux')
-    plt.legend(fontsize=8, ncol=2)
+    plt.xlim(0, desired_xmax)
+    plt.xlabel('E [MeV]', fontsize=18)
+    plt.ylabel(ylabel, fontsize=18)
+    plt.title(f'IRENE {model} model – Differential flux',fontsize=18)
+    plt.legend(fontsize=12, ncol=2)
+    plt.tick_params(axis='both', which='major', labelsize=18)
     plt.grid(True, which='both', linestyle='--', alpha=0.6)
     plt.tight_layout()
 
@@ -223,12 +243,12 @@ def plot_time_resolved_neutron_yield_from_diff(ae9_file, ap9_file, threshold=200
 
 
 if __name__ == "__main__":
-    plot_irene_flux('diff.AE9.output_mean_flux.txt', n_curves=15, start_step=308, step_size=1) #11,0,36
-    plot_irene_flux('diff.AP9.output_mean_flux.txt', n_curves=15, start_step=308, step_size=1)
+    plot_irene_flux('diff.AE9.output_mean_flux.txt', n_curves=10, start_step=306, step_size=2) #11,0,36
+    plot_irene_flux('diff.AP9.output_mean_flux.txt', n_curves=10, start_step=306, step_size=2)
 
     plot_time_resolved_neutron_yield_from_diff(
     'diff.AE9.output_mean_flux.txt',
     'diff.AP9.output_mean_flux.txt',
     threshold=200,
-    lower_energy_cut=1.0,
+    lower_energy_cut=0.6,
 )

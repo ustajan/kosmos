@@ -9,6 +9,8 @@
 Sum energies of protons seen in detector 0 for each EventID,
 discarding any EventID that also contains a proton in detector 1.
 
+This is an older code which reads in the quenching factors for carbon nuclei and protons, and calculates the light output in the veto signal.  DO NOT USE.
+
 Usage:
     python sum_proton_energy.py input_file.tsv [-o output_file.tsv]
 """

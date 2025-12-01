@@ -4,15 +4,16 @@ This directory contains the inputs for simulating the proton induced counts and 
 
 Files:  
 
-*   `detector_diamond.gdml` input to grasshopper.  
-*   `output_316_min_51419_per_cm2_per_s.tsv` the spectrum of electrons.  The file name says it all.
+*   `detector_diamond.gdml` input to grasshopper. This models an EJ-276 surrounded on all sides by diamond.
+*   `detector_flat.gdml` input to grasshopper. This models an EJ-276 covered on top and bottom by diamond.
+*   `diff.AP9.output_mean_flux.AP9_i316.tsv` the spectrum of electrons.  The file name says it all.
 
 Before running one needs to copy the `.tsv` file above to `input_spectrum.txt`.
 
 ### Running grasshopper in batch mode
 
 In order to run a batch run, use a modification of the following bash command:  
-` for (( seed=0*14; seed<60*14; seed+=14 )); do ~/git/grasshopper/exec/grass_batch.sh detector_diamond.gdml diamond $seed ; done`
+` for (( seed=0*14; seed<60*14; seed+=14 )); do ~/git/grasshopper/exec/grass_batch.sh detector_flat.gdml diamond $seed ; done`
 
 The script above assumes 14 cores. Replace `14` with your # of cores.  In the example above `grass_batch.sh` will run #core=14 number of simultaneous runs.  The for loop then will run 60\*14=840 runs. The way `detector_diamond.gdml` is encoded, 14 runs will reflect 20 seconds worth of incident protons.  Thus, for the example above, 60\*20=1200 seconds of exposure will be simulated. 
 
