@@ -86,7 +86,9 @@ def plot_ap9_proton_PAD_timeavg(direction_file, lower_energy_cut=1.0):
 
     # Plot PAD
     plt.figure(figsize=(8, 5))
-    plt.semilogy(pitch_angles, J_pad_avg, 'o-')
+#    plt.semilogy(pitch_angles, J_pad_avg, 'o-')
+    plt.plot(pitch_angles, J_pad_avg, 'o-')
+    plt.yscale('linear')
     plt.xlabel('Pitch angle [deg]')
     plt.ylabel(f"Proton flux [cm$^{{-2}}$ s$^{{-1}}$ sr$^{{-1}}$]\n(E ≥ {lower_energy_cut:.2f} MeV)")
     plt.title('AP9 Proton PAD (orbit-averaged)')
@@ -102,5 +104,5 @@ def plot_ap9_proton_PAD_timeavg(direction_file, lower_energy_cut=1.0):
     print("PAD flux values:", J_pad_avg)
 
 if __name__ == "__main__":
-    plot_ap9_proton_PAD_timeavg('run1.AP9.output_mean_flux.txt', lower_energy_cut=0.1)
+    plot_ap9_proton_PAD_timeavg('run1.AP9.output_mean_flux.txt', lower_energy_cut=0.6)
     pass
