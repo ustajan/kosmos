@@ -147,7 +147,7 @@ def plot_irene_flux(filename, model_type=None, n_curves=15, start_step=300, step
     plt.grid(True, which='both', linestyle='--', alpha=0.6)
     plt.tight_layout()
 
-    out_file = Path(filename).with_suffix(f'.{model}_flux_plot.png')
+    out_file = Path(filename).with_suffix(f'.{model}_flux_plot.pdf')
     plt.savefig(out_file, dpi=300)
     plt.show()
     print(f'Plot saved to: {out_file}')
@@ -233,7 +233,7 @@ def plot_time_resolved_neutron_yield_from_diff(ae9_file, ap9_file, threshold=200
     ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
 
     plt.tight_layout()
-    out_file = Path(ae9_file).with_suffix(f'.time_resolved_neutron_cut{lower_energy_cut:.1f}MeV.png')
+    out_file = Path(ae9_file).with_suffix(f'.time_resolved_neutron_cut{lower_energy_cut:.1f}MeV.pdf')
     plt.savefig(out_file, dpi=300)
     plt.show()
 

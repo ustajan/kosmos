@@ -85,15 +85,21 @@ def filter(input_path: str, output_path: str | None) -> None:
     # 2D histogram (density) of veto energy vs E_det0
     from matplotlib.colors import LogNorm
     # use fixed ranges so the histogram aligns with the rectangle and axis limits
-    hist = plt.hist2d(
+    H, xedges, yedges, im = plt.hist2d(
         x, y,
         bins=[200, 200],
         range=[[0, 6], [0, 20]],
         cmap='viridis',
         norm=LogNorm(vmin=1)
     )
-    # colorbar for counts (hist2d returns (H, xedges, yedges, image))
-#    plt.colorbar(hist[3], label='Counts')
+    # get current axes so colorbar can be anchored to the plot (flush)
+    ax = plt.gca()
+    # compute bin sizes and add colorbar with label including MeV units
+    bin_x = xedges[1] - xedges[0]
+    bin_y = yedges[1] - yedges[0]
+    #plt.colorbar(im, label=f'Counts/{bin_x:.6g} MeV/{bin_y:.6g} MeV')
+    # use a small pad so the colorbar sits close/flush to the axes
+    plt.colorbar(im, ax=ax, label=f'Counts/{bin_x:.6g} MeV/{bin_y:.6g} MeV', pad=0.01, fraction=0.046)
     plt.xlabel('Veto deposited energy [MeV]',fontsize=14)
     plt.ylabel(r'$E_\mathrm{EJ276}$ [MeV]',fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=14)
