@@ -1,0 +1,1 @@
+This directory contains the inputs for the simulation that is used to generate Table 1 in SI Section 2.

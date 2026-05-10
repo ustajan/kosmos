@@ -1,0 +1,1 @@
+This directory contains the python script that generates Fig 1 in SI Section 0.
